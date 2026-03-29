@@ -49,11 +49,9 @@
     <div
       class="flex justify-between items-center mb-8"
     >
-      <h1
-        class="text-3xl font-extrabold text-primary-900 tracking-tight"
-      >
-        Список собеседований
-      </h1>
+      <AppTitle
+        title="Список собеседований"
+      />
       <div
         class="text-sm text-secondary font-medium bg-primary-50 px-4 py-2 rounded-full"
       >
@@ -249,6 +247,7 @@
 </template>
 
 <script setup lang="ts">
+import AppTitle from '@/components/ui/AppTitle.vue'
 import { useInterviewStore } from '@/stores/interviews'
 
 import Button from 'primevue/button'

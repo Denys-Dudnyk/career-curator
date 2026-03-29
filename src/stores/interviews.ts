@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -97,10 +98,48 @@ export const useInterviewStore =
       }
     }
 
+    const getInterviewById = async (
+      id: string,
+    ) => {
+      const docRef = doc(
+        db,
+        `users/${userId.value}/interviews`,
+        id as string,
+      )
+
+      const docSnap =
+        await getDoc(docRef)
+
+      if (!docSnap.exists()) {
+        console.error(
+          'Интервью не найдено в базе данных',
+        )
+
+        return null
+      }
+
+      const interviewData =
+        docSnap.data() as IInterview
+
+      const index =
+        interviews.value.findIndex(
+          (interview) =>
+            interview.id === id,
+        )
+
+      if (index !== -1) {
+        interviews.value[index] =
+          interviewData
+      }
+
+      return { ...interviewData }
+    }
+
     return {
       addNewInterview,
       interviews,
       getAllInterviews,
       deleteInterview,
+      getInterviewById,
     }
   })
