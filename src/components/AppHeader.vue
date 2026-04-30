@@ -19,7 +19,7 @@
             >{{
               userStore.user?.email
                 ?.charAt(0)
-                .toUpperCase() || 'A'
+                .toUpperCase() || 'CC'
             }}</span
           >
         </div>
@@ -38,7 +38,7 @@
             {{
               userStore.user?.email?.split(
                 '@',
-              )[0] || 'Аналитик'
+              )[0] || 'Career Curator'
             }}
           </div>
           <div

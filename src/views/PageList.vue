@@ -1,3 +1,55 @@
+<script setup lang="ts">
+import AppTitle from '@/components/ui/AppTitle.vue'
+import { useInterviewStore } from '@/stores/interviews'
+
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import ConfirmDialog from 'primevue/confirmdialog'
+import DataTable from 'primevue/datatable'
+import Skeleton from 'primevue/skeleton'
+import { useConfirm } from 'primevue/useconfirm'
+import { onMounted } from 'vue'
+
+import { ref } from 'vue'
+
+const useInterviews =
+  useInterviewStore()
+
+const confirm = useConfirm()
+
+const isLoading = ref<boolean>(true)
+
+const skeletonRows = Array.from(
+  { length: 15 },
+  () => ({}),
+)
+
+const showDeletePopup = (
+  id: string,
+) => {
+  confirm.require({
+    group: 'headless',
+    header: 'Удаление отклика',
+    message:
+      'Вы уверены что хотите удалить этот отклик?',
+    icon: 'pi pi-exclamation-triangle',
+
+    accept: async () => {
+      await useInterviews.deleteInterview(
+        id,
+      )
+    },
+  })
+}
+
+onMounted(async () => {
+  isLoading.value = true
+
+  await useInterviews.getAllInterviews()
+  isLoading.value = false
+})
+</script>
+
 <template>
   <ConfirmDialog group="headless">
     <template
@@ -135,7 +187,7 @@
                 class="pi pi-external-link mr-2 text-xs"
               ></i>
               <span
-                class="truncate max-w-[200px]"
+                class="truncate max-w-50"
                 >Перейти</span
               >
             </a>
@@ -216,7 +268,7 @@
           </template>
         </Column>
 
-        <Column class="w-[120px]">
+        <Column class="w-30">
           <template #body="{ data }">
             <div
               class="flex gap-2 justify-end"
@@ -245,58 +297,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import AppTitle from '@/components/ui/AppTitle.vue'
-import { useInterviewStore } from '@/stores/interviews'
-
-import Button from 'primevue/button'
-import Column from 'primevue/column'
-import ConfirmDialog from 'primevue/confirmdialog'
-import DataTable from 'primevue/datatable'
-import Skeleton from 'primevue/skeleton'
-import { useConfirm } from 'primevue/useconfirm'
-import { onMounted } from 'vue'
-
-import { ref } from 'vue'
-
-const useInterviews =
-  useInterviewStore()
-
-const confirm = useConfirm()
-
-const isLoading = ref<boolean>(true)
-
-const skeletonRows = Array.from(
-  { length: 15 },
-  () => ({}),
-)
-
-const showDeletePopup = (
-  id: string,
-) => {
-  confirm.require({
-    group: 'headless',
-    header: 'Удаление отклика',
-    message:
-      'Вы уверены что хотите удалить этот отклик?',
-    icon: 'pi pi-exclamation-triangle',
-
-    accept: async () => {
-      await useInterviews.deleteInterview(
-        id,
-      )
-    },
-  })
-}
-
-onMounted(async () => {
-  isLoading.value = true
-
-  await useInterviews.getAllInterviews()
-  isLoading.value = false
-})
-</script>
 
 <style scoped>
 :deep(

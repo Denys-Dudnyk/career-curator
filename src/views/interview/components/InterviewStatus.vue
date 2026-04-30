@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { IInterview } from '@/interfaces/interview'
+import RadioButton from 'primevue/radiobutton'
+import RadioButtonGroup from 'primevue/radiobuttongroup'
 
 const interview =
   defineModel<IInterview>({

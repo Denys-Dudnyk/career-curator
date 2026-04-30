@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppFormField from '@/components/AppFormField.vue'
 import type { IInterview } from '@/interfaces/interview'
 
 const interview =

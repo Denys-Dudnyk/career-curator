@@ -22,25 +22,16 @@
         :type="type"
         class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
         :placeholder="placeholder"
-        v-model="model as number"
+        v-model="modelNumber"
         :autocomplete="autocomplete"
       />
       <InputText
-        v-if="type === 'text'"
+        v-else
         :id="id"
         :type="type"
         class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
         :placeholder="placeholder"
-        v-model="model as string"
-        :autocomplete="autocomplete"
-      />
-      <InputText
-        v-if="type === 'url'"
-        :id="id"
-        :type="type"
-        class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
-        :placeholder="placeholder"
-        v-model="model as string"
+        v-model="modelString"
         :autocomplete="autocomplete"
       />
     </IconField>
@@ -52,11 +43,26 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
+import { computed } from 'vue'
 import AppLabel from './ui/AppLabel.vue'
 
 const model = defineModel<
   string | number
 >()
+
+const modelString = computed({
+  get: () => String(model.value ?? ''),
+  set: (val) => (model.value = val),
+})
+
+const modelNumber = computed({
+  get: () =>
+    typeof model.value === 'number'
+      ? model.value
+      : null,
+  set: (val) =>
+    (model.value = val as number),
+})
 
 defineProps({
   classContainer: {
