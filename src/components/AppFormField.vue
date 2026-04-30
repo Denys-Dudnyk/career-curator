@@ -1,13 +1,11 @@
 <template>
-  <div class="mb-5">
-    <label
-      :for="id"
-      :class="[
-        labelClass,
-        'text-normal-gray font-semibold text-xs',
-      ]"
-      >{{ label }}</label
-    >
+  <div :class="[classContainer]">
+    <AppLabel
+      :id="id"
+      :labelClass="labelClass"
+      :label="label"
+    />
+
     <IconField class="group">
       <InputIcon
         :class="[
@@ -16,13 +14,33 @@
           'transition-colors',
         ]"
         v-if="isIcon"
-      />
-      <InputText
+        >{{ iconText }}</InputIcon
+      >
+      <InputNumber
+        v-if="type === 'number'"
         :id="id"
         :type="type"
-        class="focus:border-indigo-500 rounded-lg w-full autofill:text-sm text-sm"
+        class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
         :placeholder="placeholder"
-        v-model="model"
+        v-model="model as number"
+        :autocomplete="autocomplete"
+      />
+      <InputText
+        v-if="type === 'text'"
+        :id="id"
+        :type="type"
+        class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
+        :placeholder="placeholder"
+        v-model="model as string"
+        :autocomplete="autocomplete"
+      />
+      <InputText
+        v-if="type === 'url'"
+        :id="id"
+        :type="type"
+        class="focus:border-primary rounded-lg w-full autofill:text-sm text-sm"
+        :placeholder="placeholder"
+        v-model="model as string"
         :autocomplete="autocomplete"
       />
     </IconField>
@@ -32,11 +50,23 @@
 <script setup lang="ts">
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
+import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
+import AppLabel from './ui/AppLabel.vue'
 
-const model = defineModel<string>()
+const model = defineModel<
+  string | number
+>()
 
 defineProps({
+  classContainer: {
+    type: String,
+    default: 'mb-5',
+  },
+  iconText: {
+    type: String,
+    default: '',
+  },
   iconColorClass: {
     type: String,
     default:

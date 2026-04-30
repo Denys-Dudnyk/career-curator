@@ -9,6 +9,7 @@ import {
   orderBy,
   query,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
@@ -27,73 +28,107 @@ export const useInterviewStore =
       IInterview[]
     >([])
 
+    const getDocRef = (id: string) => {
+      if (!userId.value)
+        throw new Error(
+          'User not authenticated',
+        )
+      return doc(
+        db,
+        `users/${userId.value}/interviews`,
+        id,
+      )
+    }
+
+    const getColRef = () => {
+      if (!userId.value)
+        throw new Error(
+          'User not authenticated',
+        )
+      return collection(
+        db,
+        `users/${userId.value}/interviews`,
+      )
+    }
+
     const addNewInterview = async (
       formData: Omit<
         IInterview,
         'id' | 'createdAt'
       >,
     ) => {
-      const payload: IInterview = {
-        ...formData,
-        id: uuidv4(),
-        createdAt: String(Date.now()),
-      }
-      console.log(payload)
+      try {
+        const payload: IInterview = {
+          ...formData,
+          id: uuidv4(),
+          createdAt: String(Date.now()),
+        }
+        console.log(payload)
 
-      if (userId.value) {
-        await setDoc(
-          doc(
-            db,
-            `users/${userId.value}/interviews`,
-            payload.id,
-          ),
-          payload,
+        if (userId.value) {
+          await setDoc(
+            getDocRef(payload.id),
+            payload,
+          )
+
+          interviews.value.push(payload)
+        }
+      } catch (error) {
+        console.error(
+          'Error adding interview:',
+          error,
         )
-
-        interviews.value.push(payload)
       }
     }
 
     const getAllInterviews =
       async () => {
-        const getData = query(
-          collection(
-            db,
-            `users/${userId.value}/interviews`,
-          ),
-          orderBy('createdAt', 'desc'),
-        )
-
-        const data =
-          await getDocs(getData)
-
-        interviews.value =
-          data.docs.map(
-            (doc) =>
-              doc.data() as IInterview,
+        try {
+          const getData = query(
+            getColRef(),
+            orderBy(
+              'createdAt',
+              'desc',
+            ),
           )
+
+          const data =
+            await getDocs(getData)
+
+          interviews.value =
+            data.docs.map(
+              (doc) =>
+                doc.data() as IInterview,
+            )
+        } catch (error) {
+          console.error(
+            'Error getting interviews:',
+            error,
+          )
+        }
       }
 
     const deleteInterview = async (
       id: string,
     ) => {
-      await deleteDoc(
-        doc(
-          db,
-          `users/${userId.value}/interviews`,
-          id,
-        ),
-      )
-      const index =
-        interviews.value.findIndex(
-          (interview) =>
-            interview.id === id,
-        )
+      try {
+        await deleteDoc(getDocRef(id))
+        const index =
+          interviews.value.findIndex(
+            (interview) =>
+              interview.id === id,
+          )
 
-      if (index !== -1) {
-        interviews.value.splice(
-          index,
-          1,
+        if (index !== -1) {
+          interviews.value.splice(
+            index,
+            1,
+          )
+        }
+      } catch (error) {
+        console.error(
+          'Error deleting interview:',
+          error,
         )
       }
     }
@@ -101,38 +136,71 @@ export const useInterviewStore =
     const getInterviewById = async (
       id: string,
     ) => {
-      const docRef = doc(
-        db,
-        `users/${userId.value}/interviews`,
-        id as string,
-      )
-
-      const docSnap =
-        await getDoc(docRef)
-
-      if (!docSnap.exists()) {
-        console.error(
-          'Интервью не найдено в базе данных',
+      try {
+        const docSnap = await getDoc(
+          getDocRef(id),
         )
 
+        if (!docSnap.exists()) {
+          console.error(
+            'Интервью не найдено в базе данных',
+          )
+
+          return null
+        }
+
+        const interviewData =
+          docSnap.data() as IInterview
+
+        const index =
+          interviews.value.findIndex(
+            (interview) =>
+              interview.id === id,
+          )
+
+        if (index !== -1) {
+          interviews.value[index] =
+            interviewData
+        }
+
+        return interviewData
+      } catch (error) {
+        console.error(
+          'Error fetching interview:',
+          error,
+        )
         return null
       }
+    }
 
-      const interviewData =
-        docSnap.data() as IInterview
-
-      const index =
-        interviews.value.findIndex(
-          (interview) =>
-            interview.id === id,
+    const saveInterview = async (
+      interview: IInterview,
+    ): Promise<void> => {
+      try {
+        await updateDoc(
+          getDocRef(interview.id),
+          {
+            ...interview,
+          },
         )
 
-      if (index !== -1) {
-        interviews.value[index] =
-          interviewData
-      }
+        const index =
+          interviews.value.findIndex(
+            (i) =>
+              i.id === interview.id,
+          )
 
-      return { ...interviewData }
+        if (index !== -1) {
+          interviews.value[index] = {
+            ...interview,
+          }
+        }
+      } catch (error) {
+        console.log(
+          'Error updating interview:',
+          error,
+        )
+      }
     }
 
     return {
@@ -141,5 +209,6 @@ export const useInterviewStore =
       getAllInterviews,
       deleteInterview,
       getInterviewById,
+      saveInterview,
     }
   })

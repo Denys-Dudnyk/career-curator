@@ -58,7 +58,7 @@ const routes: Array<
     path: '/interview/:id',
     name: 'Interview',
     component: () =>
-      import('@/views/PageInterview.vue'),
+      import('@/views/interview/PageInterview.vue'),
     meta: {
       requiresAuth: true,
     },
