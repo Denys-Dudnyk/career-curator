@@ -7,9 +7,10 @@ import AppLabel from '@/components/ui/AppLabel.vue'
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 
-defineProps<{
-  interview: IInterview
-}>()
+const interview =
+  defineModel<IInterview>({
+    required: true,
+  })
 
 const emit = defineEmits([
   'addStage',
